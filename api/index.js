@@ -10,9 +10,12 @@ const app = express();
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const multer = require("multer");
+// const cloudinary = require("cloudinary").v2;
 
 // middleware for file upload
+const storage = multer.memoryStorage();
 const uploadMiddleware = multer({ dest: "uploads/" });
+// const uploadMiddleware = multer({ storage });
 const fs = require("fs");
 const salt = bcrypt.genSaltSync(10);
 const secret = process.env.SECRET_KEY;
@@ -124,6 +127,7 @@ app.post("/post", uploadMiddleware.single("file"), async (req, res, next) => {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
+      // const mycloud = await cloudinary.uploader.upload(path);
       const { title, summary, content } = req.body;
       const postDoc = await Post.create({
         title,
@@ -137,7 +141,7 @@ app.post("/post", uploadMiddleware.single("file"), async (req, res, next) => {
     });
   } catch (err) {
     next(err); // Passing the error to the error-handling middleware
-    console.error("Error processing file:", error);
+    console.error("Error processing file:", err);
 
     // Cleanup uploaded file if it exists
     if (req.file && req.file.path) {
